@@ -1,0 +1,70 @@
+{% extends 'shop/base.html' %}
+
+{% block title %}Каталог - Парфюмерный магазин{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Каталог парфюмерии</h1>
+        <p>Выберите аромат по душе</p>
+    </div>
+</div>
+
+<div class="catalog-section">
+    <div class="container">
+        <div class="catalog-filters">
+            <h3>Фильтры</h3>
+            <div class="filter-group">
+                <label>Бренд:</label>
+                <select>
+                    <option>Все бренды</option>
+                    <option>Chanel</option>
+                    <option>Dior</option>
+                    <option>Versace</option>
+                    <option>Tom Ford</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Тип:</label>
+                <select>
+                    <option>Все типы</option>
+                    <option>Женские</option>
+                    <option>Мужские</option>
+                    <option>Унисекс</option>
+                </select>
+            </div>
+        </div>
+        <div class="catalog-grid">
+            <div class="catalog-item">
+                <div class="item-image"></div>
+                <h3>Название парфюма</h3>
+                <p class="item-brand">Бренд</p>
+                <p class="item-price">5 990 ₽</p>
+                <button class="btn btn-primary">В корзину</button>
+            </div>
+            <div class="catalog-item">
+                <div class="item-image"></div>
+                <h3>Название парфюма</h3>
+                <p class="item-brand">Бренд</p>
+                <p class="item-price">5 990 ₽</p>
+                <button class="btn btn-primary">В корзину</button>
+            </div>
+            <div class="catalog-item">
+                <div class="item-image"></div>
+                <h3>Название парфюма</h3>
+                <p class="item-brand">Бренд</p>
+                <p class="item-price">5 990 ₽</p>
+                <button class="btn btn-primary">В корзину</button>
+            </div>
+            <div class="catalog-item">
+                <div class="item-image"></div>
+                <h3>Название парфюма</h3>
+                <p class="item-brand">Бренд</p>
+                <p class="item-price">5 990 ₽</p>
+                <button class="btn btn-primary">В корзину</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
