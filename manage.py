@@ -3,10 +3,18 @@
 import os
 import sys
 
+# КРИТИЧЕСКИ ВАЖНО: Устанавливаем settings модуль ДО импорта Django
+# Это должно быть сделано до любого импорта Django
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'perfume_shop.settings')
+# Принудительно переопределяем, если был установлен другой
+os.environ['DJANGO_SETTINGS_MODULE'] = 'perfume_shop.settings'
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'perfume_shop.settings')
+    # Убеждаемся, что settings модуль установлен правильно
+    if os.environ.get('DJANGO_SETTINGS_MODULE') != 'perfume_shop.settings':
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'perfume_shop.settings'
+    
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

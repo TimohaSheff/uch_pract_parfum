@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Парфюмерный магазин{% endblock %}</title>
+    <title>{% block title %}PERFUME PALETTE | LUXE FRAGRANCE{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'shop/css/style.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,10 +13,11 @@
         <div class="container">
             <div class="nav-content">
                 <a href="{% url 'index' %}" class="logo-section">
-                    <div class="logo">
-                        <i class="fas fa-spray-can"></i>
+                    <img src="{% static 'shop/images/image.png' %}" alt="PERFUME PALETTE" class="logo-img">
+                    <div class="logo-text">
+                        <span class="site-name">PERFUME PALETTE</span>
+                        <span class="site-tagline">LUXE FRAGRANCE</span>
                     </div>
-                    <span class="site-name">ПарфюмЭлит</span>
                 </a>
                 <ul class="nav-menu">
                     <li><a href="{% url 'index' %}">Главная</a></li>
@@ -25,11 +26,11 @@
                 </ul>
                 <div class="auth-buttons">
                     {% if user.is_authenticated %}
-                        <a href="#" class="btn btn-secondary">{{ user.username }}</a>
-                        <a href="{% url 'admin:logout' %}" class="btn btn-primary">Выход</a>
+                        <a href="#" class="btn btn-secondary">{{ user.login }}</a>
+                        <a href="{% url 'logout' %}" class="btn btn-primary">Выход</a>
                     {% else %}
-                        <a href="{% url 'admin:login' %}" class="btn btn-secondary">Вход</a>
-                        <a href="{% url 'admin:index' %}" class="btn btn-primary">Регистрация</a>
+                        <a href="{% url 'login' %}" class="btn btn-secondary">Вход</a>
+                        <a href="{% url 'register' %}" class="btn btn-primary">Регистрация</a>
                     {% endif %}
                 </div>
             </div>
@@ -42,11 +43,12 @@
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2024 ПарфюмЭлит. Все права защищены.</p>
+            <p>&copy; 2025 PERFUME PALETTE. Все права защищены.</p>
         </div>
     </footer>
 
     <script src="{% static 'shop/js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
 

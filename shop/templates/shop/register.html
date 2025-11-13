@@ -1,0 +1,92 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Регистрация - PERFUME PALETTE | LUXE FRAGRANCE{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Регистрация</h1>
+        <p>Создайте аккаунт для доступа к эксклюзивным предложениям</p>
+    </div>
+</div>
+
+<div class="auth-section">
+    <div class="container">
+        <div class="auth-form-container">
+            <form id="registerForm" class="auth-form">
+                {% csrf_token %}
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_name">Имя *</label>
+                        <input type="text" id="id_name" name="name" class="form-control" placeholder="Введите имя" required>
+                        <span class="error-message" id="error_name"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_surname">Фамилия *</label>
+                        <input type="text" id="id_surname" name="surname" class="form-control" placeholder="Введите фамилию" required>
+                        <span class="error-message" id="error_surname"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_patronymic">Отчество</label>
+                    <input type="text" id="id_patronymic" name="patronymic" class="form-control" placeholder="Введите отчество (необязательно)">
+                    <span class="error-message" id="error_patronymic"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_login">Логин *</label>
+                    <input type="text" id="id_login" name="login" class="form-control" placeholder="Введите логин (латиница, цифры, тире)" required>
+                    <span class="error-message" id="error_login"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_email">Email *</label>
+                    <input type="email" id="id_email" name="email" class="form-control" placeholder="Введите email" required>
+                    <span class="error-message" id="error_email"></span>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="id_password">Пароль *</label>
+                        <input type="password" id="id_password" name="password" class="form-control" placeholder="Минимум 6 символов" required>
+                        <span class="error-message" id="error_password"></span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_password_repeat">Повторите пароль *</label>
+                        <input type="password" id="id_password_repeat" name="password_repeat" class="form-control" placeholder="Повторите пароль" required>
+                        <span class="error-message" id="error_password_repeat"></span>
+                    </div>
+                </div>
+                
+                <div class="form-group checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="id_rules" name="rules" required>
+                        <span>Я согласен с правилами регистрации *</span>
+                    </label>
+                    <span class="error-message" id="error_rules"></span>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary btn-block">Зарегистрироваться</button>
+                </div>
+                
+                <div class="form-group text-center">
+                    <p>Уже есть аккаунт? <a href="{% url 'login' %}">Войти</a></p>
+                </div>
+                
+                <div id="form-messages" class="form-messages"></div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'shop/js/auth.js' %}"></script>
+{% endblock %}
+
