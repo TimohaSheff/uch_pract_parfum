@@ -1,99 +1,173 @@
 {% extends 'shop/base.html' %}
+{% load static %}
 
-{% block title %}Каталог - PERFUME PALETTE | LUXE FRAGRANCE{% endblock %}
+{% block title %}Каталог парфюмерии - PERFUME PALETTE | LUXE FRAGRANCE{% endblock %}
 
 {% block content %}
-<div class="page-header">
+<div class="catalog-header">
     <div class="container">
-        <h1>Каталог парфюмерии</h1>
-        <p>Выберите аромат по душе</p>
+        <h1>Искусство аромата</h1>
+        <p class="lead">ОТКРОЙТЕ ДЛЯ СЕБЯ КОЛЛЕКЦИЮ ПРЕМИАЛЬНЫХ ПАРФЮМОВ</p>
     </div>
 </div>
 
 <div class="catalog-section">
     <div class="container">
-        <div class="catalog-filters">
-            <h3>Фильтры</h3>
-            <div class="filter-group">
-                <label>Бренд:</label>
-                <select>
-                    <option>Все бренды</option>
-                    <option>Chanel</option>
-                    <option>Dior</option>
-                    <option>Yves Saint Laurent</option>
-                    <option>Giorgio Armani</option>
-                    <option>Lancôme</option>
-                </select>
+        <div class="catalog-controls">
+            <!-- Фильтры -->
+            <div class="catalog-filters compact-filters">
+                <h3><i class="fas fa-sliders-h"></i> Фильтры</h3>
+                <form method="get" action="{% url 'catalog' %}" class="filters-form">
+                    <div class="filter-group">
+                        <label for="category"><i class="fas fa-tag"></i> КАТЕГОРИЯ:</label>
+                        <select name="category" id="category" onchange="this.form.submit()">
+                            <option value="">Все категории</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if current_category == cat.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ cat.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="gender"><i class="fas fa-user"></i> ДЛЯ КОГО:</label>
+                        <select name="gender" id="gender" onchange="this.form.submit()">
+                            <option value="">Все</option>
+                            <option value="women" {% if current_gender == 'women' %}selected{% endif %}>Женские</option>
+                            <option value="men" {% if current_gender == 'men' %}selected{% endif %}>Мужские</option>
+                            <option value="unisex" {% if current_gender == 'unisex' %}selected{% endif %}>Унисекс</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="brand"><i class="fas fa-crown"></i> БРЕНДЫ:</label>
+                        <select name="brand" id="brand" onchange="this.form.submit()">
+                            <option value="">Все бренды</option>
+                            {% for brand in brands %}
+                                <option value="{{ brand.id }}" {% if current_brand == brand.id|stringformat:"i" %}selected{% endif %}>
+                                    {{ brand.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="notes"><i class="fas fa-spa"></i> НОТЫ:</label>
+                        <select name="notes" id="notes" onchange="this.form.submit()">
+                            <option value="">Все ноты</option>
+                            <option value="woody" {% if current_notes == 'woody' %}selected{% endif %}>Древесные</option>
+                            <option value="floral" {% if current_notes == 'floral' %}selected{% endif %}>Цветочные</option>
+                            <option value="fresh" {% if current_notes == 'fresh' %}selected{% endif %}>Свежие</option>
+                            <option value="oriental" {% if current_notes == 'oriental' %}selected{% endif %}>Ориентальные</option>
+                            <option value="citrus" {% if current_notes == 'citrus' %}selected{% endif %}>Цитрусовые</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="concentration"><i class="fas fa-flask"></i> КОНЦЕНТРАЦИЯ:</label>
+                        <select name="concentration" id="concentration" onchange="this.form.submit()">
+                            <option value="">Все</option>
+                            {% for value, label in concentration_choices %}
+                                <option value="{{ value }}" {% if current_concentration == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="price_range"><i class="fas fa-ruble-sign"></i> ЦЕНА:</label>
+                        <select name="price_range" id="price_range" onchange="this.form.submit()">
+                            <option value="">Любая</option>
+                            <option value="0-5000" {% if current_price_range == '0-5000' %}selected{% endif %}>до 5 000 ₽</option>
+                            <option value="5000-15000" {% if current_price_range == '5000-15000' %}selected{% endif %}>5 000 - 15 000 ₽</option>
+                            <option value="15000-30000" {% if current_price_range == '15000-30000' %}selected{% endif %}>15 000 - 30 000 ₽</option>
+                            <option value="30000+" {% if current_price_range == '30000+' %}selected{% endif %}>от 30 000 ₽</option>
+                        </select>
+                    </div>
+                </form>
             </div>
-            <div class="filter-group">
-                <label>Тип:</label>
-                <select>
-                    <option>Все типы</option>
-                    <option>Женские</option>
-                    <option>Мужские</option>
-                    <option>Унисекс</option>
+
+            <!-- Сортировка -->
+            <div class="catalog-sorting">
+                <h3><i class="fas fa-sort"></i> Сортировка:</h3>
+                <select name="sort" id="sort" onchange="this.form.submit()" class="sort-select">
+                    <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>По новизне</option>
+                    <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>По популярности</option>
+                    <option value="price_asc" {% if current_sort == 'price_asc' %}selected{% endif %}>Цена: по возрастанию</option>
+                    <option value="price_desc" {% if current_sort == 'price_desc' %}selected{% endif %}>Цена: по убыванию</option>
+                    <option value="name" {% if current_sort == 'name' %}selected{% endif %}>По названию (А-Я)</option>
+                    <option value="brand" {% if current_sort == 'brand' %}selected{% endif %}>По бренду</option>
                 </select>
+                <span class="product-count">{{ products|length }} парфюмов</span>
             </div>
         </div>
+        
+        {% if products %}
         <div class="catalog-grid">
+            {% for product in products %}
             <div class="catalog-item">
-                <div class="item-image" style="background-image: url('https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&q=80'); background-size: cover; background-position: center;"></div>
-                <h3>Chanel No. 5</h3>
-                <p class="item-brand">Chanel</p>
-                <p class="item-price">12 990 ₽</p>
-                <button class="btn btn-primary">В корзину</button>
+                <div class="item-badge">
+                    {% if product.is_new %}<span class="badge-new">NEW</span>{% endif %}
+                    {% if product.is_bestseller %}<span class="badge-bestseller">Хит</span>{% endif %}
+                    {% if product.discount %}<span class="badge-discount">-{{ product.discount }}%</span>{% endif %}
+                </div>
+                <a href="{% url 'product_detail' product.slug %}" class="product-link">
+                    <div class="item-image-container">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="item-image">
+                        {% else %}
+                            <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop" alt="{{ product.name }}" class="item-image">
+                        {% endif %}
+                    </div>
+                    <div class="item-info">
+                        <p class="item-brand">{{ product.brand.name }}</p>
+                        <h3 class="item-title">{{ product.name }}</h3>
+                        <p class="item-volume">{{ product.volume }} мл</p>
+                        <p class="item-notes">{{ product.notes_short }}</p>
+                        <div class="item-price-section">
+                            {% if product.discount %}
+                                <p class="item-price-old">{{ product.price|floatformat:0 }} ₽</p>
+                                <p class="item-price">{{ product.get_discounted_price|floatformat:0 }} ₽</p>
+                            {% else %}
+                                <p class="item-price">{{ product.price|floatformat:0 }} ₽</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                <div class="item-actions">
+                    <button class="btn btn-quickview" onclick="window.location.href='{% url 'product_detail' product.slug %}'">
+                        <i class="fas fa-eye"></i> Подробнее
+                    </button>
+                    <button class="btn btn-add-to-cart" onclick="addToCart({{ product.id }})">
+                        <i class="fas fa-shopping-cart"></i> В корзину
+                    </button>
+                </div>
             </div>
-            <div class="catalog-item">
-                <div class="item-image" style="background-image: url('https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=400&q=80'); background-size: cover; background-position: center;"></div>
-                <h3>Sauvage</h3>
-                <p class="item-brand">Dior</p>
-                <p class="item-price">8 490 ₽</p>
-                <button class="btn btn-primary">В корзину</button>
-            </div>
-            <div class="catalog-item">
-                <div class="item-image" style="background-image: url('https://images.unsplash.com/photo-1595425970377-c97073c2721a?w=400&q=80'); background-size: cover; background-position: center;"></div>
-                <h3>Black Opium</h3>
-                <p class="item-brand">Yves Saint Laurent</p>
-                <p class="item-price">7 990 ₽</p>
-                <button class="btn btn-primary">В корзину</button>
-            </div>
-            <div class="catalog-item">
-                <div class="item-image" style="background-image: url('https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&q=80'); background-size: cover; background-position: center;"></div>
-                <h3>Acqua di Gio</h3>
-                <p class="item-brand">Giorgio Armani</p>
-                <p class="item-price">6 990 ₽</p>
-                <button class="btn btn-primary">В корзину</button>
-            </div>
-            <div class="catalog-item">
-                <div class="item-image" style="background-image: url('https://images.unsplash.com/photo-1612817288484-6f916006741a?w=400&q=80'); background-size: cover; background-position: center;"></div>
-                <h3>La Vie Est Belle</h3>
-                <p class="item-brand">Lancôme</p>
-                <p class="item-price">9 490 ₽</p>
-                <button class="btn btn-primary">В корзину</button>
-            </div>
-            <div class="catalog-item">
-                <div class="item-image" style="background-image: url('https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?w=400&q=80'); background-size: cover; background-position: center;"></div>
-                <h3>Bleu de Chanel</h3>
-                <p class="item-brand">Chanel</p>
-                <p class="item-price">10 990 ₽</p>
-                <button class="btn btn-primary">В корзину</button>
-            </div>
-            <div class="catalog-item">
-                <div class="item-image" style="background-image: url('https://images.unsplash.com/photo-1615634260167-c8cdede054de?w=400&q=80'); background-size: cover; background-position: center;"></div>
-                <h3>J'adore</h3>
-                <p class="item-brand">Dior</p>
-                <p class="item-price">11 490 ₽</p>
-                <button class="btn btn-primary">В корзину</button>
-            </div>
-            <div class="catalog-item">
-                <div class="item-image" style="background-image: url('https://images.unsplash.com/photo-1595425970377-c97073c2721a?w=400&q=80'); background-size: cover; background-position: center;"></div>
-                <h3>Libre</h3>
-                <p class="item-brand">Yves Saint Laurent</p>
-                <p class="item-price">8 990 ₽</p>
-                <button class="btn btn-primary">В корзину</button>
-            </div>
+            {% endfor %}
         </div>
+        {% else %}
+        <div class="no-products">
+            <div class="no-products-icon">
+                <i class="fas fa-wind"></i>
+            </div>
+            <h3>Ароматы не найдены</h3>
+            <p>Попробуйте изменить параметры фильтрации</p>
+            <a href="{% url 'catalog' %}" class="btn btn-primary">Сбросить фильтры</a>
+        </div>
+        {% endif %}
+        
+        {% if products.has_other_pages %}
+        <div class="pagination">
+            {% if products.has_previous %}
+                <a href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">&laquo; Первая</a>
+                <a href="?page={{ products.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">‹ Назад</a>
+            {% endif %}
+            
+            <span class="current">Страница {{ products.number }} из {{ products.paginator.num_pages }}</span>
+            
+            {% if products.has_next %}
+                <a href="?page={{ products.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Далее ›</a>
+                <a href="?page={{ products.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Последняя &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
-

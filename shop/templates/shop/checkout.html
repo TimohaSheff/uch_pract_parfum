@@ -1,0 +1,362 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Оформление заказа - PERFUME PALETTE | LUXE FRAGRANCE{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="checkout-page">
+    <div class="checkout-header">
+        <h1>ОФОРМЛЕНИЕ ЗАКАЗА</h1>
+        <div class="checkout-steps">
+            <div class="step active">КОРЗИНА</div>
+            <div class="step-arrow">→</div>
+            <div class="step current">ДАННЫЕ</div>
+            <div class="step-arrow">→</div>
+            <div class="step">ПОДТВЕРЖДЕНИЕ</div>
+        </div>
+    </div>
+
+    <div class="checkout-content">
+        <div class="checkout-layout">
+            <!-- Левая колонка - форма -->
+            <div class="checkout-form-section">
+                <form id="order-form" method="post" action="{% url 'create_order_api' %}" class="checkout-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-section">
+                        <h2>КЛИЕНТ</h2>
+                        <div class="client-info">
+                            <div class="info-row">
+                                <span class="label">ФИО:</span>
+                                <span class="value">{{ request.user.surname }} {{ request.user.name }} {{ request.user.patronymic|default:"" }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">EMAIL:</span>
+                                <span class="value">{{ request.user.email }}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">ТЕЛЕФОН:</span>
+                                <span class="value">{{ request.user.phone_number|default:"НЕ УКАЗАН" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2>АДРЕС ДОСТАВКИ</h2>
+                        <div class="form-group">
+                            <label for="city">ГОРОД *</label>
+                            <input type="text" id="city" name="city" required 
+                                   placeholder="МОСКВА" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address">АДРЕС *</label>
+                            <input type="text" id="address" name="address" required 
+                                   placeholder="УЛИЦА, ДОМ, КВАРТИРА" class="form-input">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="postal_code">ПОЧТОВЫЙ ИНДЕКС</label>
+                            <input type="text" id="postal_code" name="postal_code" 
+                                   placeholder="123456" class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2>СПОСОБ ОПЛАТЫ</h2>
+                        <div class="payment-options">
+                            <label class="payment-option selected">
+                                <input type="radio" name="payment_method" value="cash" checked>
+                                <div class="option-content">
+                                    <span class="option-title">НАЛИЧНЫЕ ПРИ ПОЛУЧЕНИИ</span>
+                                    <span class="option-desc">ОПЛАТА КУРЬЕРУ ИЛИ В ПУНКТЕ ВЫДАЧИ</span>
+                                </div>
+                            </label>
+                            
+                            <label class="payment-option">
+                                <input type="radio" name="payment_method" value="card">
+                                <div class="option-content">
+                                    <span class="option-title">БАНКОВСКОЙ КАРТОЙ</span>
+                                    <span class="option-desc">ОНЛАЙН ОПЛАТА КАРТОЙ</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2>КОММЕНТАРИЙ К ЗАКАЗУ</h2>
+                        <div class="form-group">
+                            <textarea id="comment" name="comment" rows="4" 
+                                      placeholder="ДОПОЛНИТЕЛЬНАЯ ИНФОРМАЦИЯ" 
+                                      class="form-input"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h2>ПОДТВЕРЖДЕНИЕ</h2>
+                        <div class="form-group">
+                            <label for="password">ПАРОЛЬ ДЛЯ ПОДТВЕРЖДЕНИЯ *</label>
+                            <input type="password" id="password" name="password" required 
+                                   placeholder="ВАШ ПАРОЛЬ" class="form-input">
+                            <div class="form-hint">Необходимо для защиты от несанкционированных заказов</div>
+                            <div id="password-error" class="error-message" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Скрытые поля для AJAX -->
+                    <input type="hidden" name="ajax" value="true">
+                    
+                    <!-- Кнопки формы -->
+                    <div class="form-actions">
+                        <a href="{% url 'cart' %}" class="btn btn-secondary">ВЕРНУТЬСЯ В КОРЗИНУ</a>
+                        <button type="submit" class="submit-order-btn">
+                            ПОДТВЕРДИТЬ ЗАКАЗ
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Правая колонка - заказ -->
+            <div class="checkout-summary-section">
+                <div class="order-summary">
+                    <h2>ВАШ ЗАКАЗ</h2>
+                    
+                    <div class="order-items">
+                        {% for item in items %}
+                        <div class="order-item">
+                            <div class="item-image">
+                                {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                                {% endif %}
+                            </div>
+                            <div class="item-info">
+                                <div class="item-name">{{ item.product.name }}</div>
+                                <div class="item-meta">{{ item.product.brand.name }} • {{ item.product.volume }} мл</div>
+                                <div class="item-quantity">{{ item.quantity }} × {{ item.product.get_discounted_price|floatformat:0 }} ₽</div>
+                            </div>
+                            <div class="item-total">{{ item.get_total_price|floatformat:0 }} ₽</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="order-totals">
+                        <div class="total-row">
+                            <span>ТОВАРОВ ({{ cart.get_total_items }} шт.)</span>
+                            <span>{{ cart.get_total_price|floatformat:0 }} ₽</span>
+                        </div>
+                        <div class="total-row">
+                            <span>ДОСТАВКА</span>
+                            <span class="free">БЕСПЛАТНО</span>
+                        </div>
+                        
+                        <div class="total-divider"></div>
+                        
+                        <div class="total-final">
+                            <span>К ОПЛАТЕ</span>
+                            <span class="final-amount">{{ cart.get_total_price|floatformat:0 }} ₽</span>
+                        </div>
+                    </div>
+
+                    <div class="secure-info">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <span>ЗАЩИЩЕННОЕ СОЕДИНЕНИЕ • SSL ШИФРОВАНИЕ</span>
+                    </div>
+
+                    <div class="back-link">
+                        <a href="{% url 'cart' %}">← ВЕРНУТЬСЯ В КОРЗИНУ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Инлайн скрипт для обработки формы -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Checkout page loaded');
+    
+    // Инициализация выбора способа оплаты
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.payment-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            this.classList.add('selected');
+            this.querySelector('input').checked = true;
+        });
+    });
+    
+    // Обработка отправки формы
+    const form = document.getElementById('order-form');
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Предотвращаем стандартную отправку
+            
+            console.log('Form submission started');
+            
+            // Собираем данные формы
+            const formData = new FormData(form);
+            const data = {
+                password: formData.get('password'),
+                address: formData.get('address'),
+                city: formData.get('city'),
+                postal_code: formData.get('postal_code'),
+                comment: formData.get('comment'),
+                payment_method: form.querySelector('input[name="payment_method"]:checked').value
+            };
+            
+            console.log('Form data:', data);
+            
+            // Валидация
+            const errorDiv = document.getElementById('password-error');
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+            
+            if (!data.password) {
+                showError('Введите пароль для подтверждения');
+                return;
+            }
+            
+            if (!data.address) {
+                showError('Введите адрес доставки');
+                return;
+            }
+            
+            if (!data.city) {
+                showError('Введите город доставки');
+                return;
+            }
+            
+            // Показываем индикатор загрузки
+            const submitBtn = form.querySelector('.submit-order-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'ОБРАБОТКА...';
+            submitBtn.disabled = true;
+            
+            // Отправляем запрос
+            fetch('/api/order/create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(result => {
+                console.log('Response data:', result);
+                
+                if (result.success) {
+                    // Успешное оформление - показываем сообщение на странице
+                    const successMessage = document.createElement('div');
+                    successMessage.className = 'success-message';
+                    successMessage.innerHTML = `
+                        <h3>ЗАКАЗ УСПЕШНО ОФОРМЛЕН!</h3>
+                        <p>Номер вашего заказа: <strong>${result.order_number}</strong></p>
+                        <p>С вами свяжется менеджер для подтверждения.</p>
+                        <button onclick="window.location.href='/'">ВЕРНУТЬСЯ НА ГЛАВНУЮ</button>
+                    `;
+                    
+                    // Заменяем форму сообщением
+                    form.parentNode.replaceChild(successMessage, form);
+                    
+                    // Обновляем стили
+                    document.querySelector('.checkout-form-section').style.textAlign = 'center';
+                    document.querySelector('.checkout-form-section').style.padding = '40px';
+                    
+                } else {
+                    // Ошибка
+                    showError(result.error || 'Неизвестная ошибка');
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Ошибка сети или сервера: ' + error.message);
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+    }
+    
+    // Функция показа ошибки
+    function showError(message) {
+        const errorDiv = document.getElementById('password-error');
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        
+        // Скролл к ошибке
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Автоматическое скрытие через 10 секунд
+        setTimeout(() => {
+            errorDiv.style.display = 'none';
+        }, 10000);
+    }
+});
+</script>
+
+<!-- Стили для успешного сообщения -->
+<style>
+.success-message {
+    background: #f8fff8;
+    border: 1px solid #27ae60;
+    padding: 30px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.success-message h3 {
+    color: #27ae60;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.success-message p {
+    margin: 10px 0;
+    color: #333;
+    font-size: 16px;
+}
+
+.success-message strong {
+    color: #000;
+    font-size: 20px;
+}
+
+.success-message button {
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.success-message button:hover {
+    background: #333;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Ничего не нужно, скрипт уже встроен -->
+{% endblock %}

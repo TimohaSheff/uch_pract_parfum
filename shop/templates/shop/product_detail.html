@@ -1,0 +1,129 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - PERFUME PALETTE | LUXE FRAGRANCE{% endblock %}
+
+{% block content %}
+<div class="product-header">
+    <div class="container">
+        <h1>{{ product.name }}</h1>
+        <p class="lead">{{ product.brand.name }} | {% if product.category %}{{ product.category.name }}{% else %}{{ product.get_concentration_display }}{% endif %}</p>
+    </div>
+</div>
+
+<div class="product-detail-section">
+    <div class="container">
+        <div class="product-detail">
+            <div class="product-image-section">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-main-image">
+                {% else %}
+                    <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=800&fit=crop" alt="{{ product.name }}" class="product-main-image">
+                {% endif %}
+            </div>
+            
+            <div class="product-info-section">
+                <h2 class="product-name">{{ product.name }}</h2>
+                <p class="product-brand">{{ product.brand.name }}</p>
+                
+                <div class="product-price-section">
+                    {% if product.discount %}
+                        <p class="product-price-old">{{ product.price|floatformat:0 }} ₽</p>
+                        <p class="product-price">{{ product.get_discounted_price|floatformat:0 }} ₽</p>
+                        <span class="product-discount">-{{ product.discount }}%</span>
+                    {% else %}
+                        <p class="product-price">{{ product.price|floatformat:0 }} ₽</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Характеристики как в задании, но адаптированные для парфюмерии -->
+                <div class="product-specs">
+                    <h3><i class="fas fa-info-circle"></i> Характеристики</h3>
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <span class="spec-label"><i class="fas fa-globe"></i> Страна-производитель:</span>
+                            <span class="spec-value">{{ product.country }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label"><i class="fas fa-calendar-alt"></i> Год выпуска коллекции:</span>
+                            <span class="spec-value">{{ product.created_at.year }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label"><i class="fas fa-tag"></i> Тип парфюма:</span>
+                            <span class="spec-value">{{ product.get_concentration_display }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label"><i class="fas fa-user"></i> Для кого:</span>
+                            <span class="spec-value">{{ product.get_gender_display_name }}</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label"><i class="fas fa-weight"></i> Объем:</span>
+                            <span class="spec-value">{{ product.volume }} мл</span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label"><i class="fas fa-flask"></i> Концентрация:</span>
+                            <span class="spec-value">{{ product.get_concentration_display }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Ноты аромата -->
+                <div class="product-notes">
+                    <h3><i class="fas fa-spa"></i> Ноты аромата</h3>
+                    <div class="notes-section">
+                        {% if product.notes_top %}
+                        <div class="note-level">
+                            <span class="note-label">Верхние ноты:</span>
+                            <span class="note-value">{{ product.notes_top }}</span>
+                        </div>
+                        {% endif %}
+                        {% if product.notes_middle %}
+                        <div class="note-level">
+                            <span class="note-label">Ноты сердца:</span>
+                            <span class="note-value">{{ product.notes_middle }}</span>
+                        </div>
+                        {% endif %}
+                        {% if product.notes_base %}
+                        <div class="note-level">
+                            <span class="note-label">Базовые ноты:</span>
+                            <span class="note-value">{{ product.notes_base }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Описание -->
+                {% if product.description %}
+                <div class="product-description">
+                    <h3><i class="fas fa-align-left"></i> Описание</h3>
+                    <p>{{ product.description }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Кнопка "В корзину" -->
+                <div class="product-actions">
+                    {% if product.in_stock %}
+                        <button class="btn btn-primary btn-large" onclick="addToCart({{ product.id }})">
+                            <i class="fas fa-shopping-cart"></i> В корзину
+                        </button>
+                        <button class="btn btn-wishlist">
+                            <i class="far fa-heart"></i> В избранное
+                        </button>
+                    {% else %}
+                        <button class="btn btn-out-of-stock" disabled>
+                            <i class="fas fa-times-circle"></i> Нет в наличии
+                        </button>
+                    {% endif %}
+                </div>
+                
+                <!-- Статусы товара -->
+                <div class="product-status">
+                    {% if product.is_new %}<span class="status-badge badge-new">NEW</span>{% endif %}
+                    {% if product.is_bestseller %}<span class="status-badge badge-bestseller">Хит продаж</span>{% endif %}
+                    {% if product.is_limited %}<span class="status-badge badge-limited">Лимитированная серия</span>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

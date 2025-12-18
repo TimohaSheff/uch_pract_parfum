@@ -1,0 +1,164 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Корзина - PERFUME PALETTE | LUXE FRAGRANCE{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/shop/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+    <div class="cart-header">
+        <h1>КОРЗИНА</h1>
+        <div class="cart-subtitle">Ваши избранные парфюмы</div>
+    </div>
+
+    <div class="cart-content">
+        {% if items %}
+        <div class="cart-layout">
+            <!-- Левая колонка - товары -->
+            <div class="cart-items-section">
+                <div class="cart-table-header">
+                    <div class="col-product">ТОВАР</div>
+                    <div class="col-price">ЦЕНА</div>
+                    <div class="col-quantity">КОЛ-ВО</div>
+                    <div class="col-total">СУММА</div>
+                    <div class="col-remove"></div>
+                </div>
+
+                {% for item in items %}
+                <div class="cart-item-row" data-item-id="{{ item.id }}">
+                    <!-- Товар -->
+                    <div class="col-product">
+                        <div class="product-container">
+                            <div class="product-image">
+                                {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="product-img">
+                                {% else %}
+                                <div class="no-image">
+                                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                                        <path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                                    </svg>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="product-info">
+                                <h3 class="product-name">{{ item.product.name }}</h3>
+                                <div class="product-details">
+                                    <span class="product-brand">{{ item.product.brand.name }}</span>
+                                    <span class="separator">|</span>
+                                    <span class="product-volume">{{ item.product.volume }} мл</span>
+                                    <span class="separator">|</span>
+                                    <span class="product-concentration">{{ item.product.get_concentration_display }}</span>
+                                </div>
+                                <div class="product-gender">
+                                    {{ item.product.get_gender_display }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Цена -->
+                    <div class="col-price">
+                        {% if item.product.discount %}
+                        <div class="price-container">
+                            <div class="price-original">{{ item.product.price|floatformat:0 }} ₽</div>
+                            <div class="price-discounted">{{ item.product.get_discounted_price|floatformat:0 }} ₽</div>
+                        </div>
+                        {% else %}
+                        <div class="price-regular">{{ item.product.price|floatformat:0 }} ₽</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Количество -->
+                    <div class="col-quantity">
+                        <div class="quantity-control">
+                            <button class="qty-btn minus" onclick="updateQuantity({{ item.id }}, -1)">−</button>
+                            <input type="number" class="qty-input" value="{{ item.quantity }}" min="1" max="100">
+                            <button class="qty-btn plus" onclick="updateQuantity({{ item.id }}, 1)">+</button>
+                        </div>
+                    </div>
+
+                    <!-- Сумма -->
+                    <div class="col-total">
+                        <span class="total-price">{{ item.get_total_price|floatformat:0 }} ₽</span>
+                    </div>
+
+                    <!-- Удаление -->
+                    <div class="col-remove">
+                        <button class="remove-btn" onclick="removeFromCart({{ item.id }})">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Правая колонка - итоги -->
+            <div class="cart-summary-section">
+                <div class="order-summary">
+                    <h2>СВОДКА ЗАКАЗА</h2>
+                    
+                    <div class="summary-items">
+                        <div class="summary-row">
+                            <span>Товаров ({{ cart.get_total_items }} шт.)</span>
+                            <span>{{ cart.get_total_price|floatformat:0 }} ₽</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Доставка</span>
+                            <span class="free">Бесплатно</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-divider"></div>
+
+                    <div class="summary-total">
+                        <span>К ОПЛАТЕ</span>
+                        <span class="total-amount">{{ cart.get_total_price|floatformat:0 }} ₽</span>
+                    </div>
+
+                    <a href="{% url 'checkout' %}" class="checkout-button">
+                        ПЕРЕЙТИ К ОФОРМЛЕНИЮ
+                    </a>
+
+                    <div class="secure-info">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <span>Безопасная оплата • Конфиденциальность данных</span>
+                    </div>
+
+                    <div class="continue-link">
+                        <a href="{% url 'catalog' %}">
+                            ← ПРОДОЛЖИТЬ ПОКУПКИ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Пустая корзина -->
+        <div class="empty-cart">
+            <div class="empty-icon">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                    <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+            </div>
+            <h2>ВАША КОРЗИНА ПУСТА</h2>
+            <p>Здесь появятся товары, которые вы добавите</p>
+            <a href="{% url 'catalog' %}" class="empty-button">
+                ПЕРЕЙТИ В КАТАЛОГ
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/cart.js' %}"></script>
+{% endblock %}

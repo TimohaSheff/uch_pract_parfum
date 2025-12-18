@@ -1,0 +1,246 @@
+{% extends 'shop/base.html' %}
+{% load static %}
+
+{% block title %}Личный кабинет - PERFUME PALETTE | LUXE FRAGRANCE{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/shop/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="account-page">
+    <div class="account-header">
+        <h1>ЛИЧНЫЙ КАБИНЕТ</h1>
+        <div class="user-info">
+            <div class="user-welcome">
+                <span class="welcome-text">Добро пожаловать,</span>
+                <span class="user-name">{{ request.user.surname }} {{ request.user.name }}</span>
+            </div>
+            <div class="user-stats">
+                <div class="stat-item">
+                    <span class="stat-number">{{ orders|length }}</span>
+                    <span class="stat-label">ЗАКАЗОВ</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ total_items }}</span>
+                    <span class="stat-label">ТОВАРОВ</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">{{ request.user.date_joined|date:"d.m.Y" }}</span>
+                    <span class="stat-label">С ДАТЫ РЕГИСТРАЦИИ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="account-content">
+        <div class="account-layout">
+            <!-- Левая колонка - меню -->
+            <div class="account-sidebar">
+                <div class="sidebar-menu">
+                    <div class="menu-item active" data-tab="orders">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span>МОИ ЗАКАЗЫ</span>
+                    </div>
+                    <div class="menu-item" data-tab="profile">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        <span>ПРОФИЛЬ</span>
+                    </div>
+                    <div class="menu-item" data-tab="wishlist">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                        </svg>
+                        <span>ИЗБРАННОЕ</span>
+                    </div>
+                    <div class="menu-item logout">
+                        <a href="{% url 'logout' %}" class="logout-link">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
+                            </svg>
+                            <span>ВЫХОД</span>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="sidebar-help">
+                    <h3>ПОМОЩЬ</h3>
+                    <div class="help-links">
+                        <a href="{% url 'contacts' %}">КОНТАКТЫ</a>
+                        <a href="{% url 'about' %}">О КОМПАНИИ</a>
+                        <a href="#">ДОСТАВКА И ОПЛАТА</a>
+                        <a href="#">ВОЗВРАТ ТОВАРА</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая колонка - контент -->
+            <div class="account-main">
+                <!-- Вкладка "Мои заказы" -->
+                <!-- Пример для вкладки "Мои заказы" -->
+                <div class="tab-content active" id="orders-tab">
+                    {% if orders %}
+                    {% for order in orders %}
+                    <div class="order-card" id="order-{{ order.id }}">
+                        <div class="order-header">
+                            <div class="order-info">
+                                <h4>Заказ №{{ order.order_number }}</h4>
+                                <p class="order-date">Дата: {{ order.created_at|date:"d.m.Y H:i" }}</p>
+                                <p class="order-status">Статус: {{ order.get_status_display }}</p>
+                                <p class="order-total">Сумма: {{ order.total_price }} ₽</p>
+                            </div>
+
+                            <div class="order-actions">
+                                <!-- Кнопка удаления -->
+                                {% if order.can_be_deleted %}
+                                <form method="POST" action="{% url 'delete_order' order.id %}" style="display: inline;"
+                                    onsubmit="return confirm('Вы уверены, что хотите удалить заказ №{{ order.order_number }}?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-delete">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            stroke="currentColor" stroke-width="2">
+                                            <path
+                                                d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                            </path>
+                                        </svg>
+                                        Удалить
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <!-- Кнопка отмены (если нужна) -->
+                                {% if order.can_be_cancelled and order.status != 'cancelled' %}
+                                <form method="POST" action="{% url 'cancel_order' order.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-cancel"
+                                        onclick="return confirm('Отменить заказ №{{ order.order_number }}?');">
+                                        Отменить
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                            </div>
+                        </div>
+
+                        <!-- Детали заказа (если нужны прямо здесь) -->
+                        <div class="order-items">
+                            <h4>Товары в заказе:</h4>
+                            {% for item in order.items.all %}
+                            <div class="order-item">
+                                <strong>{{ item.product_name }}</strong> -
+                                {{ item.quantity }} шт. × {{ item.product_price }} ₽ =
+                                {{ item.get_total_price }} ₽
+                            </div>
+                            {% empty %}
+                            <p>Нет информации о товарах</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <p class="empty-message">У вас пока нет заказов</p>
+                    {% endif %}
+                </div>
+                <!-- Вкладка "Профиль" -->
+                <div class="tab-content" id="profile-tab">
+                    <div class="profile-header">
+                        <h2>МОЙ ПРОФИЛЬ</h2>
+                        <div class="profile-edit-btn">РЕДАКТИРОВАТЬ</div>
+                    </div>
+
+                    <form id="profile-form" class="profile-form">
+                        <div class="form-section">
+                            <h3>ЛИЧНАЯ ИНФОРМАЦИЯ</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>ФАМИЛИЯ</label>
+                                    <input type="text" value="{{ request.user.surname }}" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>ИМЯ</label>
+                                    <input type="text" value="{{ request.user.name }}" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>ОТЧЕСТВО</label>
+                                    <input type="text" value="{{ request.user.patronymic|default:'' }}" disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>КОНТАКТНАЯ ИНФОРМАЦИЯ</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>EMAIL</label>
+                                    <input type="email" value="{{ request.user.email }}" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>ТЕЛЕФОН</label>
+                                    <input type="tel" value="{{ request.user.phone_number|default:'' }}" disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h3>СМЕНА ПАРОЛЯ</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>ТЕКУЩИЙ ПАРОЛЬ</label>
+                                    <input type="password" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>НОВЫЙ ПАРОЛЬ</label>
+                                    <input type="password" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label>ПОВТОРИТЕ ПАРОЛЬ</label>
+                                    <input type="password" disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" disabled>СОХРАНИТЬ ИЗМЕНЕНИЯ</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Вкладка "Избранное" -->
+                <div class="tab-content" id="wishlist-tab">
+                    <div class="wishlist-header">
+                        <h2>ИЗБРАННЫЕ ТОВАРЫ</h2>
+                        <span class="wishlist-count">(0 товаров)</span>
+                    </div>
+
+                    <div class="empty-wishlist">
+                        <div class="empty-icon">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="1">
+                                <path
+                                    d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                            </svg>
+                        </div>
+                        <h3>ВАШ СПИСОК ИЗБРАННОГО ПУСТ</h3>
+                        <p>Добавляйте понравившиеся товары, чтобы не потерять их</p>
+                        <a href="{% url 'catalog' %}" class="btn btn-primary">ПЕРЕЙТИ В КАТАЛОГ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/account.js' %}"></script>
+{% endblock %}
